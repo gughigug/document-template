@@ -115,13 +115,17 @@ export default function DocumentFlowShell() {
     email: "",
   });
 
-  const updateMittenteField = (field: PersonField, value: string) => {
-    setMittente((prev) => ({ ...prev, [field]: value }));
-  };
 
-  const updateDestinatarioField = (field: PersonField, value: string) => {
-    setDestinatario((prev) => ({ ...prev, [field]: value }));
-  };
+
+ type PersonField = keyof PersonData;
+
+const updateMittenteField = (field: PersonField, value: string) => {
+  setMittente((prev) => ({ ...prev, [field]: value }));
+};
+
+const updateDestinatarioField = (field: PersonField, value: string) => {
+  setDestinatario((prev) => ({ ...prev, [field]: value }));
+};
 
   useEffect(() => {
     return () => {
