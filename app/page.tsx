@@ -9,8 +9,34 @@ import {
   FaFilePdf,
 } from "react-icons/fa";
 
+type DeliveryOption = {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  price?: number;
+};
+
+type PhonePrefix = {
+  code: string;
+  country: string;
+};
+
+type PersonData = {
+  nome: string;
+  nazione: string;
+  indirizzo: string;
+  citta: string;
+  cap: string;
+  telefono: string;
+  email: string;
+};
+
+type Preview =
+  | { type: "image"; src: string }
+  | { type: "pdf"; src: string };
+
 // Opzioni generiche, senza "canale urgente"
-const deliveryOptions = [
+const deliveryOptions: DeliveryOption[] = [
   {
     title: "STANDARD",
     description: "Consegna stimata in 3–6 giorni lavorativi",
@@ -33,7 +59,7 @@ const deliveryOptions = [
   },
 ];
 
-const phonePrefixes = [
+const phonePrefixes: PhonePrefix[] = [
   { code: "+39", country: "Italia" },
   { code: "+1", country: "USA/Canada" },
   { code: "+44", country: "Regno Unito" },
@@ -44,7 +70,7 @@ const phonePrefixes = [
   { code: "+41", country: "Svizzera" },
 ];
 
-const countries = [
+const countries: string[] = [
   "Italia",
   "Germania",
   "Francia",
@@ -57,16 +83,18 @@ const countries = [
   "Altro...",
 ];
 
+type PersonField = keyof PersonData;
+
 export default function DocumentFlowShell() {
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [senderPrefix, setSenderPrefix] = useState("+39");
-  const [receiverPrefix, setReceiverPrefix] = useState("+39");
-  const [step, setStep] = useState(1);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<Preview | null>(null);
+  const [senderPrefix, setSenderPrefix] = useState<string>("+39");
+  const [receiverPrefix, setReceiverPrefix] = useState<string>("+39");
+  const [step, setStep] = useState<number>(1);
 
   // Mittente
-  const [mittente, setMittente] = useState({
+  const [mittente, setMittente] = useState<PersonData>({
     nome: "",
     nazione: countries[0],
     indirizzo: "",
@@ -77,7 +105,7 @@ export default function DocumentFlowShell() {
   });
 
   // Destinatario
-  const [destinatario, setDestinatario] = useState({
+  const [destinatario, setDestinatario] = useState<PersonData>({
     nome: "",
     nazione: countries[0],
     indirizzo: "",
@@ -87,11 +115,11 @@ export default function DocumentFlowShell() {
     email: "",
   });
 
-  const updateMittenteField = (field, value) => {
+  const updateMittenteField = (field: PersonField, value: string) => {
     setMittente((prev) => ({ ...prev, [field]: value }));
   };
 
-  const updateDestinatarioField = (field, value) => {
+  const updateDestinatarioField = (field: PersonField, value: string) => {
     setDestinatario((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -103,8 +131,8 @@ export default function DocumentFlowShell() {
     };
   }, [preview]);
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
     if (!selectedFile) {
       setFile(null);
       setPreview(null);
@@ -130,14 +158,14 @@ export default function DocumentFlowShell() {
 
   // Stub pagamento (resta come demo)
   const handlePayment = () => {
-    return new Promise((resolve) => {
+    return new Promise<string>((resolve) => {
       setTimeout(() => {
         resolve("Pagamento effettuato con successo!");
       }, 1500);
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (selectedOption === null) {
@@ -174,8 +202,8 @@ export default function DocumentFlowShell() {
           </h1>
           <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">
             Interfaccia neutra per flussi di invio documenti: selezione servizio,
-            dati mittente/destinatario, upload file e riepilogo. Multi-brand ready,
-            agganciabile a logiche di business diverse.
+            dati mittente/destinatario, upload file e riepilogo. Multi-brand
+            ready, agganciabile a logiche di business diverse.
           </p>
         </header>
 
@@ -504,18 +532,22 @@ export default function DocumentFlowShell() {
                 <h3 className="text-lg font-semibold mb-2 select-none">
                   Tipo di servizio
                 </h3>
-                <p className="font-medium">
-                  {deliveryOptions[selectedOption].title}
-                </p>
-                <p className="text-xs text-slate-600">
-                  {deliveryOptions[selectedOption].description}
-                </p>
-                <p className="text-xs text-slate-600 mt-1">
-                  Prezzo indicativo: €
-                  {deliveryOptions[selectedOption]?.price !== undefined
-                    ? deliveryOptions[selectedOption].price.toFixed(2)
-                    : "0.00"}
-                </p>
+                {selectedOption !== null && (
+                  <>
+                    <p className="font-medium">
+                      {deliveryOptions[selectedOption].title}
+                    </p>
+                    <p className="text-xs text-slate-600">
+                      {deliveryOptions[selectedOption].description}
+                    </p>
+                    <p className="text-xs text-slate-600 mt-1">
+                      Prezzo indicativo: €
+                      {deliveryOptions[selectedOption]?.price !== undefined
+                        ? deliveryOptions[selectedOption].price!.toFixed(2)
+                        : "0.00"}
+                    </p>
+                  </>
+                )}
               </div>
 
               <div>
@@ -607,7 +639,7 @@ export default function DocumentFlowShell() {
           </div>
         )}
 
-        {/* SYSTEM NOTES – stessa logica “shell” dell’hospitality */}
+        {/* SYSTEM NOTES */}
         <section className="pt-4 pb-10">
           <div className="max-w-5xl mx-auto rounded-2xl border border-slate-200 bg-white px-5 sm:px-7 py-7 sm:py-8 grid md:grid-cols-3 gap-x-8 gap-y-6 text-sm">
             <div className="space-y-3">
